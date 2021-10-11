@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Đừng ho nữa troi du</h1>
+<p>No, siriusly, chet day</p>
+
+<br><br><br><br><br>
+
+<h1>Python to LaTeX Pseudocode Converter</h1>
+
+<p>Paste a Python function here</p>
+
+<!-- <input type="text" cols="40" rows="5" id="myText"   value="Some text..."> -->
+<textarea type="text" cols="50" rows="10" id="myText" value="ss">def ditme(may):
+    pass</textarea>
+
+<button onclick="py2latex()">Convert</button>
+
+<p style="white-space: pre" id="output"></p>
+
+<script>
+function py2latex() {
+  const REPLACE_STRINGS = new Map([
+    ["_", "\\_"]
+  ]);
+  const REPLACE_TOKENS = new Map([
+    [">=", "$\ge$"],
+    ["<=", "$\le$"],
+    ["<", "$<$"],
+    [">", "$>$"],
+    ["for", "\\textbf{for}"],
+    ["while", "\\textbf{while}"],
+    ["in", "\\textbf{in}"],
+    ["if", "\\textbf{if}"],
+    ["elif", "\\textbf{elif}"],
+    ["else:", "\\textbf{else}:"],
+    ["else", "\\textbf{else}"],
+    ["and", "\\textbf{and}"],
+    ["or", "\\textbf{or}"],
+    ["return", "\\textbf{return}"],         
+    ["[]", "[~]"],
+  ]);
+  const PREFIX_TOKENS = new Map([
+    ["=", "SET "]
+  ]);
+  var str = document.getElementById("myText").value;
+  var x = '';
+  var lines = str.split("\n");
+  var hasStarted = false;
+  for (var i = 0; i<lines.length; i++) {
+    if (lines[i].slice(0,3) != "def" && !hasStarted) continue;
+    else if (hasStarted && (lines[i][0] != " " || lines[i][0] == "#")) continue;
+    else if (lines[i].slice(0,3) == "def") {
+      var algoName = lines[i].split(/\s(.*)\(/)[1].replaceAll("_", "\\_");
+      hasStarted = true;
+      continue;
+    }
+    if (lines[i].trim().length == 0) {
+        x += "\\State \n";
+        continue;
+    }
+    
+    var line = lines[i].split(/\s/);
+    var j = 0;
+      
+    console.log(`Is here ${lines[i]}`);
+    while (line[j] == "") {
+    	if (j<4) j++;
+        else line[j++] = "~";
+    }
+    var ret = "";
+    for (j=0; j<line.length; j++) {
+    	var temp = REPLACE_TOKENS.get(line[j]);
+        if (temp != undefined)
+        	line[j] = temp;
+        ret += line[j] + " ";
+    }
+    REPLACE_STRINGS.forEach((value, key) => {ret = ret.replaceAll(key, value);})
+    x = x + "\\State " + ret + "\n";
+  }
+  
+  var header = "%% Remember to include the following at the start of file\n%% \\newcommand{~}{\ }\n%%\\usepackage{algorithm}\n%% \\usepackage[noend]{algpseudocode}\n%% \\renewcommand{\\algorithmicrequire}{\\textbf{Input:}}\n%%\\renewcommand{\\algorithmicensure}{\\textbf{Output:}}\n\\begin{algorithm}\n\\caption{~({\\sc " + algoName + "})}\n\\label{algo:fib}\n\\begin{algorithmic}[1]";
+  var inp = "INPUT";
+  var out = "OUTPUT";
+  header += "\n\\Require " + inp + "\n" + "\\Ensure " + out + "\n";
+  var tail = "\\end{algorithmic}\n\\end{algorithm}";
+
+  x = header + x + tail;
+  document.getElementById("output").innerHTML = x;
+  //document.getElementById("output").innerHTML = (REPLACE_TOKENS.get("-") == undefined);
+}
+</script>
+
+
+
+
+</body>
+</html>
